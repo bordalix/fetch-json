@@ -3,7 +3,10 @@ import * as coingecko from './coingecko'
 import { Fiats, KVData, Periods } from './types'
 
 /**
- * This file contains the main logic for fetching historical price data for Bitcoin in various fiat currencies and time * periods. It tries to fetch the data from the Coinbase API first, and if that fails (e.g. due to unsupported trading * pair or API issues), it falls back to the Coingecko API. The fetched data is then structured in a consistent format * and can be stored in the KV storage for caching purposes.
+ * This file contains the main logic for fetching historical price data for Bitcoin in various fiat currencies and time
+ * periods. It tries to fetch the data from the Coinbase API first, and if that fails (e.g. due to unsupported trading
+ * pair or API issues), it falls back to the Coingecko API. The fetched data is then structured in a consistent format
+ * and can be stored in the KV storage for caching purposes.
  */
 
 /**
@@ -20,7 +23,6 @@ export const fetchDataForPeriod = async (period: Periods, fiat: Fiats): Promise<
     if (!data || data.length === 0) throw new Error('No data returned from Coinbase API')
     return { data, from: 'coinbase', when: Date.now() }
   } catch {
-    console.log(`Fetching data for period ${period} and fiat ${fiat} from Coingecko API...`)
     const data = await coingecko.fetchDataForPeriod(period, fiat)
     if (!data || data.length === 0) throw new Error('No data returned from Coingecko API')
     return { data, from: 'coingecko', when: Date.now() }
