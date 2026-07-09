@@ -98,9 +98,6 @@ const fetchLastWeekData = async (fiat: Fiats): Promise<LivelineData> => {
   const granularity = Granularities.hourly
   const startTime = new Date(Date.now() - oneWeek)
   const data = await getData(days, granularity, fiat)
-  console.log(
-    `Fetched ${data.filter((point) => point.time * 1000 > startTime.getTime()).length} data points for the last week with Coingecko API`,
-  )
   return data.filter((point) => point.time * 1000 > startTime.getTime())
 }
 
@@ -155,7 +152,6 @@ const getData = async (days: number, granularity: Granularities, fiat: Fiats): P
   if (!coingeckoResponse.ok) {
     const body = await coingeckoResponse.text()
     const { status, statusText } = coingeckoResponse
-    console.error(`CoinGecko request failed with ${status} ${statusText}: ${body}`)
     throw new Error(`CoinGecko request failed with ${status} ${statusText}: ${body}`)
   }
   const data: CoingeckoResponse = await coingeckoResponse.json()

@@ -100,7 +100,7 @@ Highlights:
 Defines strong contracts for:
 
 - `Periods`: `oneHour`, `oneDay`, `oneWeek`, `oneMonth`, `oneYear`, `all`,
-- `Fiats`: `EUR`, `USD`, `CHF`, `JPY`, `GBP`, `CNY`,
+- `Fiats`: `EUR`, `USD`, `CHF`, `JPY`, `GBP`, `CNY`, `BRL`,
 - `LivelinePoint`: `{ time, value }`,
 - `KVData`: `{ data, when, from }`,
 - `Env`: Cloudflare binding for KV namespace.
@@ -120,7 +120,7 @@ Defines strong contracts for:
 ### Supported Values
 
 - `period`: `oneHour`, `oneDay`, `oneWeek`, `oneMonth`, `oneYear`, `all`
-- `fiat`: `EUR`, `USD`, `CHF`, `JPY`, `GBP`, `CNY`
+- `fiat`: `EUR`, `USD`, `CHF`, `JPY`, `GBP`, `CNY`, `BRL`
 
 Note: Coinbase does not support every fiat above; unsupported Coinbase pairs are automatically
 served by the Coingecko fallback.

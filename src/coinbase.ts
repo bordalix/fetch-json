@@ -147,7 +147,6 @@ const getData = async (start: Date, end: Date, granularity: number, fiat: Fiats)
   if (!coinbaseResponse.ok) {
     const body = await coinbaseResponse.text()
     const { status, statusText } = coinbaseResponse
-    console.error(`Coinbase request failed with ${status} ${statusText}: ${body}`)
     throw new Error(`Coinbase request failed with ${status} ${statusText}: ${body}`)
   }
   const data: CoinbaseCandle[] = await coinbaseResponse.json()

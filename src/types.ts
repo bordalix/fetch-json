@@ -9,6 +9,7 @@ export enum Fiats {
   JPY = 'JPY',
   GBP = 'GBP',
   CNY = 'CNY',
+  BRL = 'BRL',
 }
 
 export type LivelinePoint = {
