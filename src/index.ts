@@ -1,5 +1,5 @@
 import { isValidResetToken } from './utils'
-import { Env, Fiats, Periods } from './types'
+import { Env, Fiats, KVData, Periods } from './types'
 import { getDataForPeriod, periodNeedsUpdate, resetKVStorage, updateDataForPeriod } from './kv'
 
 const corsHeaders = {
@@ -26,24 +26,32 @@ export default {
       return respondWith(null, 204)
     }
 
+    // Extract params from request
+    const fiat = extractFiatFromRequest(request) // default to USD
+    const period = extractPeriodFromRequest(request) // default to oneDay
+    const resetToken = await extractResetTokenFromRequest(request) // optional
+
+    let data = await getDataForPeriod(env, period, fiat)
+
+    // Check for reset token and reset KV storage if valid
     try {
-      // Check for reset token and reset KV storage if valid
-      const resetToken = await extractResetTokenFromRequest(request)
       if (resetToken && (await isValidResetToken(resetToken))) {
         await resetKVStorage(env)
         return respondWith({ status: 'KV storage reset successfully' }, 200)
       }
-      // Extract period and fiat from the request, check if data needs to be updated, and return data
-      const period = extractPeriodFromRequest(request)
-      const fiat = extractFiatFromRequest(request)
-      const data = (await periodNeedsUpdate(env, period, fiat))
-        ? await updateDataForPeriod(env, period, fiat)
-        : await getDataForPeriod(env, period, fiat)
+    } catch {
+      return respondWith({ error: 'Unable to reset KV storage' }, 500)
+    }
+
+    // Fetch or update data based on the period and fiat
+    try {
+      if (await periodNeedsUpdate(env, period, fiat)) {
+        data = await updateDataForPeriod(env, period, fiat)
+      }
+    } catch {
+    } finally {
       const result = data ?? { error: 'No data available' }
       return respondWith(result, 200)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Internal server error'
-      return respondWith({ error: message }, 500)
     }
   },
 } satisfies ExportedHandler<Env>
