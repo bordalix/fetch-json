@@ -26,12 +26,12 @@ export default {
       return respondWith(null, 204)
     }
 
+    let data: KVData | null = null
+
     // Extract params from request
     const fiat = extractFiatFromRequest(request) // default to USD
     const period = extractPeriodFromRequest(request) // default to oneDay
     const resetToken = await extractResetTokenFromRequest(request) // optional
-
-    let data = await getDataForPeriod(env, period, fiat)
 
     // Check for reset token and reset KV storage if valid
     try {
@@ -39,8 +39,14 @@ export default {
         await resetKVStorage(env)
         return respondWith({ status: 'KV storage reset successfully' }, 200)
       }
-    } catch {
-      return respondWith({ error: 'Unable to reset KV storage' }, 500)
+    } catch (error) {
+      return respondWith({ error: `Unable to reset KV storage: ${extractErrorMessage(error)}` }, 500)
+    }
+
+    try {
+      data = await getDataForPeriod(env, period, fiat)
+    } catch (error) {
+      return respondWith({ error: `Failed to get data: ${extractErrorMessage(error)}` }, 500)
     }
 
     // Fetch or update data based on the period and fiat
@@ -48,11 +54,13 @@ export default {
       if (await periodNeedsUpdate(env, period, fiat)) {
         data = await updateDataForPeriod(env, period, fiat)
       }
-    } catch {
-    } finally {
-      const result = data ?? { error: 'No data available' }
-      return respondWith(result, 200)
+    } catch (error) {
+      if (!data) {
+        return respondWith({ error: `Failed to update data: ${extractErrorMessage(error)}` }, 500)
+      }
     }
+    const result = data ?? { error: 'No data available' }
+    return respondWith(result, 200)
   },
 } satisfies ExportedHandler<Env>
 
@@ -71,4 +79,10 @@ const extractFiatFromRequest = (request: Request): Fiats => {
 const extractResetTokenFromRequest = async (request: Request): Promise<string | null> => {
   const url = new URL(request.url)
   return url.searchParams.get('reset')
+}
+
+const extractErrorMessage = (error: unknown): string => {
+  if (error instanceof Error) return error.message
+  if (typeof error === 'string') return error
+  return 'Unknown error'
 }
